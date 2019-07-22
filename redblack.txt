@@ -1,0 +1,226 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+struct node
+{
+   int colour;//black=0,red=1
+   int key;
+   struct node *left;
+   struct node *right;
+   struct node *p;
+};
+typedef struct node * NODE;
+
+NODE getnode();
+void inorder(NODE root);
+void leftrotate(NODE root,NODE x);
+void rightrotate(NODE root,NODE y);
+NODE rbinsert(NODE root,NODE z);
+void rbinsertfixup(NODE root,NODE z);
+int height(NODE x);
+
+NODE getnode()
+{
+   NODE x;
+   x=(NODE)malloc(sizeof(struct node));
+   if(x==NULL)
+   {
+      printf("Out of memory");
+      exit(0);
+   }
+   return x;
+}
+
+void inorder(NODE root)
+{
+   if(root==NULL)
+   {
+      return;
+   }
+   inorder(root->left);
+   printf("%d ",root->key);
+   inorder(root->right);
+}
+
+void leftrotate(NODE root,NODE x)
+{
+   NODE y;
+   y=x->right;
+   x->right=y->left;
+   if(y->left!=NULL)
+   {
+      y->left->p=x;
+   }
+   y->p=x->p;
+   if(x->p==NULL)
+   {
+      root=y;
+   }
+   else if(x==x->p->left)
+   {
+      x->p->left=y;
+   }
+   else
+   {
+      x->p->right=y;
+   }
+   y->left=x;
+   x->p=y;
+}
+void rightrotate(NODE root,NODE y)
+{
+   NODE x;
+   x=y->left;
+   y->left=x->right;
+   if(x->right!=NULL)
+   {
+      x->right->p=y;
+   }
+   x->p=y->p;
+   if(y->p==NULL)
+   {
+      root=x;
+   }
+   else if(y==y->p->right)
+   {
+      y->p->right=x;
+   }
+   else
+   {
+      y->p->left=x;
+   }
+   x->right=y;
+   y->p=x;
+}
+NODE rbinsert(NODE root,NODE z)
+{
+   NODE y,x;
+   int h;
+   y=NULL;
+   x=root;
+   while(x!=NULL)
+   {
+      y=x;
+      if(z->key<x->key)
+      {
+         x=x->left;
+      }
+      else
+      {
+         x=x->right;
+      }
+   }
+   z->p=y;
+   if(y==NULL)
+   {
+      root=z;
+      printf("1 Item inserted is %d\n",z->key);
+   }
+   else if(z->key<y->key)
+   {
+      y->left=z;
+      printf("2 Item inserted is %d\n",z->key);
+   }
+   else
+   {
+      y->right=z;
+      printf("3 Item inserted is %d\n",z->key);
+   }
+   z->left=NULL;
+   z->right=NULL;
+   z->colour=1;
+   h=height(root);
+   //printf("height is %d",h);
+   //if(h>=2)
+   //{
+      rbinsertfixup(root,z);
+   //}
+   return root;
+}
+
+void rbinsertfixup(NODE root,NODE z)
+{
+   NODE y;
+   if(root==z)
+   {
+      return;
+   }
+   while(z->p->colour==1)
+   {
+      if(z->p==z->p->p->left)
+      {
+         y=z->p->p->right;
+         if(y->colour==1)
+         {
+            z->p->colour=0;
+            y->colour=0;
+            z->p->p->colour=1;
+            z=z->p->p;
+         }
+         else if(z==z->p->right)
+         {
+            z=z->p;
+            leftrotate(root,z);
+         }
+         z->p->colour=0;
+         z->p->p->colour=1;
+         rightrotate(root,z->p->p);
+      }
+      else
+ {
+         y=z->p->p->left;
+         if(y->colour==1)
+         {
+            z->p->colour=0;
+            y->colour=0;
+            z->p->p->colour=1;
+            z=z->p->p;
+         }
+         else if(z==z->p->left)
+         {
+            z=z->p;
+            rightrotate(root,z);
+         }
+         z->p->colour=0;
+         z->p->p->colour=1;
+         leftrotate(root,z->p->p);
+      }
+   }
+   root->colour=0;
+}
+
+int height(NODE x)
+{
+   int ldepth,rdepth;
+   if(x==NULL)
+   {
+      return 0;
+   }
+   else
+   {
+      ldepth=height(x->left);
+      rdepth=height(x->right);
+      if(ldepth>rdepth)
+         return (ldepth+1);
+      else
+         return (rdepth+1);
+   }
+            
+}
+
+void main()
+{
+   NODE root,z;
+   int choice,item,i;
+   int a[5]={3,2,4,1,5};
+   root=NULL;
+   z=getnode();
+   for(i=0;i<5;i++)
+   {
+      z->key=a[i];
+      root=rbinsert(root,z);
+      //printf("Hi");
+   }
+   inorder(root);
+}
+                              
